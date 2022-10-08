@@ -1,0 +1,42 @@
+// This is your Prisma schema file,
+// learn more about it in the docs: https://pris.ly/d/prisma-schema
+
+generator client {
+  provider = "prisma-client-js"
+  output   = "./gen"
+}
+
+datasource db {
+  provider = "sqlite"
+  url      = "file:./note.db"
+}
+
+model Note {
+  id String @id @default(uuid())
+
+  notebook_id String
+  notebook    NoteBook @relation(fields: [notebook_id], references: [id], onDelete: Cascade)
+
+  title   String
+  content String
+
+  accessed_at DateTime @default(now())
+  created_at  DateTime @default(now())
+  updated_at  DateTime @updatedAt
+}
+
+model NoteBook {
+  id String @id @default(uuid())
+
+  pid      String?    @unique
+  parent   NoteBook?  @relation("ParentChildren", fields: [pid], references: [id])
+  children NoteBook[] @relation("ParentChildren")
+
+  name       String
+  is_default Boolean @default(false)
+
+  created_at DateTime @default(now())
+  updated_at DateTime @updatedAt
+
+  Note Note[]
+}

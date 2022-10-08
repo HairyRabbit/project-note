@@ -1,0 +1,162 @@
+{
+  "name": "project-note-vscode",
+  "displayName": "project-note",
+  "description": "note",
+  "version": "0.0.1",
+  "engines": {
+    "vscode": "^1.71.0"
+  },
+  "categories": [
+    "Other"
+  ],
+  "activationEvents": [
+    "onCommand:note.helloWorld",
+    "onView:note.view.notebooks",
+    "onFileSystem:note"
+  ],
+  "main": "./out/extension.js",
+  "contributes": {
+    "commands": [
+      {
+        "command": "note.command.note.open",
+        "title": "Open Note"
+      },
+      {
+        "command": "note.command.notebook.create",
+        "title": "New NoteBook",
+        "icon": "$(new-folder)"
+      },
+      {
+        "command": "note.command.note.create",
+        "title": "New Note",
+        "icon": "$(new-file)"
+      },
+      {
+        "command": "note.command.notebook.refresh",
+        "title": "Refresh",
+        "icon": "$(refresh)"
+      },
+      {
+        "command": "note.command.notebook.delete",
+        "title": "Delete NoteBook",
+        "icon": "$(trash)"
+      },
+      {
+        "command": "note.command.notebook.rename",
+        "title": "Rename NoteBook",
+        "icon": "$(pencil)"
+      },
+      {
+        "command": "note.command.note.delete",
+        "title": "Delete",
+        "icon": "$(trash)"
+      }
+    ],
+    "menus": {
+      "view/title": [
+        {
+          "command": "note.command.notebook.create",
+          "when": "view == note.view.notebooks",
+          "group": "navigation"
+        },
+        {
+          "command": "note.command.note.create",
+          "when": "view == note.view.notebooks",
+          "group": "navigation"
+        },
+        {
+          "command": "note.command.notebook.refresh",
+          "when": "view == note.view.notebooks",
+          "group": "navigation"
+        }
+      ],
+      "view/item/context": [
+        {
+          "command": "note.command.notebook.create",
+          "when": "view == note.view.notebooks && viewItem == notebook",
+          "group": "inline"
+        },
+        {
+          "command": "note.command.note.create",
+          "when": "view == note.view.notebooks && viewItem == notebook",
+          "group": "inline"
+        },
+        {
+          "command": "note.command.notebook.rename",
+          "when": "view == note.view.notebooks && viewItem == notebook",
+          "group": "inline"
+        },
+        {
+          "command": "note.command.notebook.delete",
+          "when": "view == note.view.notebooks && viewItem == notebook",
+          "group": "inline"
+        },
+        {
+          "command": "note.command.note.delete",
+          "when": "view == note.view.notebooks && viewItem == note",
+          "group": "inline"
+        }
+      ]
+    },
+    "viewsContainers": {
+      "activitybar": [
+        {
+          "id": "note-explorer",
+          "title": "Note",
+          "icon": "public/logo.svg"
+        }
+      ]
+    },
+    "views": {
+      "note-explorer": [
+        {
+          "id": "note.view.notebooks",
+          "name": "NoteBooks"
+        },
+        {
+          "id": "note.view.allnotes",
+          "name": "All Notes"
+        },
+        {
+          "id": "note-books",
+          "name": "Books"
+        }
+      ]
+    },
+    "viewsWelcome": [
+      {
+        "view": "note-books",
+        "contents": "No notes here \n[Create Note](command:vscode.create_note)\n"
+      }
+    ]
+  },
+  "scripts": {
+    "vscode:prepublish": "yarn run compile",
+    "compile": "tsc -p ./",
+    "watch": "tsc -watch -p ./",
+    "pretest": "yarn run compile && yarn run lint",
+    "lint": "eslint src --ext ts",
+    "test": "node ./out/test/runTest.js",
+    "db:m": "yarn prisma migrate dev --schema=./database/schema.prisma",
+    "db:g": "yarn prisma generate --schema=./database/schema.prisma"
+  },
+  "devDependencies": {
+    "@types/glob": "^7.2.0",
+    "@types/markdown-it": "^12.2.3",
+    "@types/mocha": "^9.1.1",
+    "@types/node": "16.x",
+    "@types/vscode": "^1.71.0",
+    "@typescript-eslint/eslint-plugin": "^5.31.0",
+    "@typescript-eslint/parser": "^5.31.0",
+    "@vscode/test-electron": "^2.1.5",
+    "eslint": "^8.20.0",
+    "glob": "^8.0.3",
+    "mocha": "^10.0.0",
+    "prisma": "^4.4.0",
+    "typescript": "^4.7.4"
+  },
+  "dependencies": {
+    "@prisma/client": "^4.4.0",
+    "markdown-it": "^13.0.1"
+  }
+}
