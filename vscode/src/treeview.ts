@@ -1,7 +1,10 @@
 import * as vscode from 'vscode'
-import { Note, NoteBook, PrismaClient } from '../database/gen'
+import { Note, NoteBook, PrismaClient, Tag } from '../database/gen'
 import { get_db } from './db'
 import * as MarkdownIt from 'markdown-it'
+import { get_title_text } from './markdown/title_text'
+import { get_tags } from './markdown/tags'
+import { tag_block } from './markdown/tag-block'
 
 const NoteSchema = 'note'
 
@@ -12,7 +15,7 @@ export class NoteTreeView implements vscode.TreeDataProvider<NoteBook | Note>, v
   private _onDidChangeFile = new vscode.EventEmitter<vscode.FileChangeEvent[]>()
   readonly onDidChangeFile: vscode.Event<vscode.FileChangeEvent[]> = this._onDidChangeFile.event
 
-  private md = MarkdownIt()
+  private md = MarkdownIt().use(tag_block)
 
   constructor(context: vscode.ExtensionContext, private db: ReturnType<typeof get_db>, private default_note_book: NoteBook) {
     context.subscriptions.push(
@@ -178,42 +181,62 @@ export class NoteTreeView implements vscode.TreeDataProvider<NoteBook | Note>, v
     return Buffer.from(note.content)
   }
 
-  async writeFile(uri: vscode.Uri, content: Uint8Array): Promise<void> {
+  async writeFile(uri: vscode.Uri, buffer: Uint8Array): Promise<void> {
     const query = new URLSearchParams(uri.query)
     const id = query.get('id')
     if (null === id) throw vscode.FileSystemError.FileNotFound(uri)
 
-    const note_content = Buffer.from(content).toString('utf-8')
-    const tokens = this.md.parse(note_content, {})
-    const inlines: (typeof tokens)['0'][] = []
-    for (let i = 0,beg = false; i < tokens.length; i++) {
-      const token = tokens[i]
-      if(undefined === token) break
-      if('heading_open' === token.type && 'h1' === token.tag) {
-        beg = true
-        continue
-      }
-      if('heading_close' === token.type && 'h1' === token.tag) {
-        break
-      }
+    const content = Buffer.from(buffer).toString('utf-8')
+    const title = get_title_text(this.md, content)
+    const tags = get_tags(this.md, content)
+    console.log('tags:', tags)
 
-      if(!beg) continue
-      if('inline' === token.type && token.children) {
-        token.children.forEach(t => inlines.push(t))
-      }
-    }
-    const title = this.md.renderer.renderInlineAsText(inlines, {}, {})
-    console.log(title)
 
-    await this.db.note.update({
-      where: {
-        id
-      },
-      data: {
-        title: '' === title ? undefined : title,
-        content: note_content
-      },
-    })
+    const res = await this.db.$transaction([
+      this.db.note.update({
+        where: {
+          id
+        },
+        data: {
+          title: '' === title ? undefined : title,
+          content: content,
+          NodeTag: {
+            deleteMany: {
+              note_id: id
+            },                    
+          },
+        },
+      }),
+      this.db.nodeTag.deleteMany({
+        where: {
+          note_id: id
+        }
+      }),
+      ...tags.map(name => {
+        return this.db.nodeTag.create({
+          data: {
+            note: {
+              connect: {
+                id,
+              }
+            },
+            tag: {
+              connectOrCreate: {
+                where: {
+                  name
+                },
+                create: {
+                  name
+                }
+              }
+            }
+          }
+        })
+      })      
+    ])
+
+    console.log(res)
+
 
     this._fireSoon({ type: vscode.FileChangeType.Changed, uri })
     this.refresh()
@@ -309,5 +332,5 @@ export class NoteTreeView implements vscode.TreeDataProvider<NoteBook | Note>, v
       }
     })
     this.refresh()
-  }
+  }  
 }

@@ -1,0 +1,14 @@
+.tag {
+  display: block;
+  margin-bottom: 2rem;
+}
+
+.tag-item {
+  display: inline-block;
+  margin-right: 0.5rem;
+  padding: 0.125rem 0.375rem;
+  border: 1px solid rgba(255, 255, 255, 0.28);
+  border-radius: 4px;
+  cursor: pointer;
+  font-size: small;
+}

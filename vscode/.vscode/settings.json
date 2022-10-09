@@ -14,5 +14,13 @@
   "typescript.tsdk": ".yarn/sdks/typescript/lib",
   "typescript.enablePromptUseWorkspaceTsdk": true,
   "eslint.nodePath": ".yarn/sdks",
-  "svg.preview.background": "editor"
+  "svg.preview.background": "editor",
+  "sqltools.connections": [
+    {
+      "previewLimit": 50,
+      "driver": "SQLite",
+      "database": "${workspaceFolder:vscode}/database/note.db",
+      "name": "note"
+    }
+  ]
 }

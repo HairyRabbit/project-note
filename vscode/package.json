@@ -16,6 +16,10 @@
   ],
   "main": "./out/extension.js",
   "contributes": {
+    "markdown.markdownItPlugins": true,
+    "markdown.previewStyles": [
+      "./markdown.style.css"
+    ],
     "commands": [
       {
         "command": "note.command.note.open",
@@ -50,6 +54,16 @@
         "command": "note.command.note.delete",
         "title": "Delete",
         "icon": "$(trash)"
+      },
+      {
+        "command": "note.command.tag.refresh",
+        "title": "Refresh",
+        "icon": "$(refresh)"
+      },
+      {
+        "command": "note.command.tag.delete",
+        "title": "Delete",
+        "icon": "$(trash)"
       }
     ],
     "menus": {
@@ -67,6 +81,11 @@
         {
           "command": "note.command.notebook.refresh",
           "when": "view == note.view.notebooks",
+          "group": "navigation"
+        },
+        {
+          "command": "note.command.tag.refresh",
+          "when": "view == note.view.tags",
           "group": "navigation"
         }
       ],
@@ -95,6 +114,11 @@
           "command": "note.command.note.delete",
           "when": "view == note.view.notebooks && viewItem == note",
           "group": "inline"
+        },
+        {
+          "command": "note.command.tag.delete",
+          "when": "view == note.view.tags && viewItem == tag",
+          "group": "inline"
         }
       ]
     },
@@ -112,6 +136,10 @@
         {
           "id": "note.view.notebooks",
           "name": "NoteBooks"
+        },
+        {
+          "id": "note.view.tags",
+          "name": "Tags"
         },
         {
           "id": "note.view.allnotes",
@@ -133,6 +161,7 @@
   "scripts": {
     "vscode:prepublish": "yarn run compile",
     "compile": "tsc -p ./",
+    "compile:webpack": "webpack",
     "watch": "tsc -watch -p ./",
     "pretest": "yarn run compile && yarn run lint",
     "lint": "eslint src --ext ts",
@@ -153,7 +182,10 @@
     "glob": "^8.0.3",
     "mocha": "^10.0.0",
     "prisma": "^4.4.0",
-    "typescript": "^4.7.4"
+    "ts-loader": "^9.4.1",
+    "typescript": "^4.7.4",
+    "webpack": "^5.74.0",
+    "webpack-cli": "^4.10.0"
   },
   "dependencies": {
     "@prisma/client": "^4.4.0",

@@ -3,6 +3,8 @@
 import * as vscode from 'vscode'
 import { get_db } from './db'
 import { NoteTreeView } from './treeview'
+import { tag_block } from './markdown/tag-block'
+import { TagTreeView } from './tag'
 
 
 // this method is called when your extension is activated
@@ -37,52 +39,16 @@ export async function activate(context: vscode.ExtensionContext) {
     }
   })
 
-  const treeview = new NoteTreeView(context, db, default_notebook)
+  const notebook_view = new NoteTreeView(context, db, default_notebook)
+  const tag_view = new TagTreeView(context, db)
+
+  notebook_view.onDidChangeFile(() => tag_view.refresh())
   
-  // const note_fs = new NoteProvider()  
-
-  // context.subscriptions.push(vscode.workspace.registerFileSystemProvider('note', note_fs, { isCaseSensitive: true }))
-
-  // note_fs.writeFile(vscode.Uri.parse('note:/foo'), Buffer.from('bar'), { create: true, overwrite: true })
-  // vscode.workspace.updateWorkspaceFolders(0, 0, { uri: vscode.Uri.parse('note:/'), name: "Note" })
-
-  
-  
-  // context.subscriptions.push(vscode.window.createTreeView('note.view.notebooks', {
-  //   treeDataProvider: treeview
-  // }))
-  // vscode.workspace.registerTextDocumentContentProvider('note', new (class implements vscode.TextDocumentContentProvider {
-  //   onDidChangeEmitter = new vscode.EventEmitter<vscode.Uri>();
-  //   onDidChange = this.onDidChangeEmitter.event;
-  //   provideTextDocumentContent(uri: vscode.Uri): string {
-  //     // invoke cowsay, use uri-path as text
-  //     return 'bar'
-  //   }
-  // })())
-
-  // context.subscriptions.push(vscode.commands.registerCommand('note.command.create', () => {
-  //   console.log(arguments)
-  //   create_note()
-  //   treeview.refresh()
-  // }))
-  // context.subscriptions.push(vscode.commands.registerCommand('note.command.open', async () => {
-  //   console.log(arguments)
-  //   let uri = vscode.Uri.parse('note:/foo')
-  //   // let doc = await vscode.workspace.openTextDocument({
-  //   //   language: 'markdown',
-  //   //   content: 'bar'
-  //   // })
-  //   // const doc = await vscode.workspace.openTextDocument(uri)
-  //   const editor = await vscode.window.showTextDocument(uri, { preview: false })
-  //   vscode.languages.setTextDocumentLanguage(editor.document, 'markdown')
-  // }))
-  // context.subscriptions.push(vscode.commands.registerCommand('note.command.delete', () => {
-  //   console.log(arguments)
-  //   create_note()
-  //   treeview.refresh()
-  // }))
-
-  // context.subscriptions.push(provider_fs)
+  return {
+    extendMarkdownIt(md: any) {
+      return md.use(tag_block)
+    }
+  }
 }
 
 // this method is called when your extension is deactivated

@@ -4,6 +4,8 @@
 generator client {
   provider = "prisma-client-js"
   output   = "./gen"
+  engineType = "library"
+  binaryTargets = ["native"]
 }
 
 datasource db {
@@ -20,9 +22,10 @@ model Note {
   title   String
   content String
 
-  accessed_at DateTime @default(now())
-  created_at  DateTime @default(now())
-  updated_at  DateTime @updatedAt
+  accessed_at DateTime  @default(now())
+  created_at  DateTime  @default(now())
+  updated_at  DateTime  @updatedAt
+  NodeTag     NodeTag[]
 }
 
 model NoteBook {
@@ -39,4 +42,29 @@ model NoteBook {
   updated_at DateTime @updatedAt
 
   Note Note[]
+}
+
+model Tag {
+  id String @id @default(uuid())
+
+  name        String @unique
+  description String @default("")
+
+  created_at DateTime  @default(now())
+  updated_at DateTime  @updatedAt
+  NodeTag    NodeTag[]
+}
+
+model NodeTag {
+  id String @id @default(uuid())
+
+  note_id String
+  note    Note   @relation(fields: [note_id], references: [id], onDelete: Cascade)
+
+  tag_id String
+  tag    Tag    @relation(fields: [tag_id], references: [id], onDelete: Cascade)
+
+  created_at DateTime @default(now())
+
+  @@unique([note_id, tag_id])
 }
